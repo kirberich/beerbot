@@ -5,12 +5,12 @@ from servo import Servo
 
 servo = Servo(port=1, min_pulse=750, max_pulse=2250)
 
-def wave(min=0.0, max=1.0, n=1):
+def wave(min=0.0, max=1.0, n=1, pause=0.4):
     for x in range(n):
         servo.set(min)
-        time.sleep(0.2)
+        time.sleep(pause)
         servo.set(max)
-        time.sleep(0.2)
+        time.sleep(pause)
         servo.set(0.5)
 
 api = Api()
