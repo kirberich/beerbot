@@ -31,7 +31,7 @@ class BotHandler(http.Request, object):
 
         try:
             if not command:
-                f = open("slider.html")
+                f = open("main.html")
                 content = f.read()
                 return self.simple_render(content, content_type="text/html")
             if command.startswith("wave"):
