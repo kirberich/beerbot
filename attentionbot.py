@@ -5,12 +5,13 @@ from servo import Servo
 
 servo = Servo(port=1, min_pulse=750, max_pulse=2250)
 
-def wave(min=0.0, max=1.0):
-    servo.set(min)
-    time.sleep(1)
-    servo.set(max)
-    time.sleep(1)
-    servo.set(0.5)
+def wave(min=0.0, max=1.0, n=1):
+    for x in range(n):
+        servo.set(min)
+        time.sleep(0.2)
+        servo.set(max)
+        time.sleep(0.2)
+        servo.set(0.5)
 
 api = Api()
 api.demonize()

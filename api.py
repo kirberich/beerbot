@@ -35,13 +35,12 @@ class BotHandler(http.Request, object):
                 content = f.read()
                 return self.simple_render(content, content_type="text/html")
             if command.startswith("wave"):
-                amount = int(args[0]) if len(args) > 0 else 1
-                for x in range(amount):
-                    if command == "wave_short":
-                        self.api.trigger("wave", min=0.3, max=0.7)
-                    else:
-                        self.api.trigger("wave")
-                return self.simple_render(" ".join(["Wave and smile."]*amount))
+                n = int(args[0]) if len(args) > 0 else 1
+                if command == "wave_short":
+                    self.api.trigger("wave", min=0.3, max=0.7, n=n)
+                else:
+                    self.api.trigger("wave", n=n)
+                return self.simple_render(" ".join(["Wave and smile."]*n))
             elif command == "set":
                 self.api.trigger("set", position=float(args[0]))
                 return self.simple_render("ok")
