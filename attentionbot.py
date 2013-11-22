@@ -1,9 +1,10 @@
 import time
 
 from api import Api
-from servo import Servo
+from servo import Servo, Motor
 
 servo = Servo(port=1, min_pulse=750, max_pulse=2250)
+motor = Motor(port=1, duty_cycle=0)
 
 def wave(min=0.0, max=1.0, n=1, pause=0.4):
     for x in range(n):
@@ -21,6 +22,7 @@ while True:
         if event == "wave":
             wave(**kwargs)
         if event == "set":
-            servo.set(kwargs["position"])
+            #servo.set(kwargs["position"])
+            motor.duty_cycle = kwargs['position']
     api.events = []
     time.sleep(0.01)
