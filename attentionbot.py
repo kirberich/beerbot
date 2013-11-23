@@ -1,7 +1,7 @@
 import time
 
 from api import Api
-from servo import Servo, Motor
+from motors import Servo, Motor
 
 servo = Servo(port=1, min_pulse=750, max_pulse=2250)
 motor = Motor(port=1, duty_cycle=0)
