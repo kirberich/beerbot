@@ -22,7 +22,8 @@ while True:
         if event == "wave":
             wave(**kwargs)
         if event == "set":
-            #servo.set(kwargs["position"])
+            servo.set(kwargs["position"])
+        if event == "set_speed"
             motor.duty_cycle = kwargs['position']
     api.events = []
     motor.tick()

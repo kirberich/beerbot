@@ -46,6 +46,9 @@ class BotHandler(http.Request, object):
             elif command == "set":
                 self.api.trigger("set", position=float(args[0]))
                 return self.simple_render("ok")
+            elif command == "set_speed":
+                self.api.trigger("set_speed", position=float(args[0]))
+                return self.simple_render("ok")
         except Exception, e:
             return self.simple_render(e.message)
 
