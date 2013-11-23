@@ -25,4 +25,5 @@ while True:
             #servo.set(kwargs["position"])
             motor.duty_cycle = kwargs['position']
     api.events = []
-    time.sleep(0.01)
+    motor.tick()
+    #time.sleep(0.01)

@@ -1,6 +1,4 @@
 from subprocess import call
-import time
-
 import piface.pfio as pfio
 
 pfio.init()
@@ -21,33 +19,26 @@ class Servo(object):
         call ("echo "+str(self.port)+"="+str(self.pulse_from_position(position))+" > /dev/servoblaster", shell=True)
 
 class Motor(object):
-    def __init__(self, port, duty_cycle=1, duty_cycle_period=0.05):
+    def __init__(self, port, duty_cycle=1):
         self.port = port
         self.duty_cycle = duty_cycle
-        self.duty_cycle_period = duty_cycle_period
         self.duty_cycle_position = 0
-        self.last_tick = time.time()
         self.state = 0
         
-        self.clear()
-
     def set(self, state):
+        if state == self.state: 
+          return
         pfio.digital_write(self.port, state)
         self.state = state
 
     def tick(self):
         """ Continue duty cycle, turn motor on or off accordingly """
-        now = time.time()
-        tick_diff = now - self.last_tick 
-
-        self.duty_cycle_position += tick_diff
-        if self.duty_cycle_position > self.duty_cycle_period:
+        self.duty_cycle_position += 0.01
+        if self.duty_cycle_position >= 1:
             self.duty_cycle_position = 0
             
-        if self.duty_cycle_position > self.duty_cycle_period*self.duty_cycle:
+        if self.duty_cycle_position >= self.duty_cycle:
             self.set(0)
         else:
             self.set(1)
-        board.set(self.port)
 
-        self.last_tick = now
