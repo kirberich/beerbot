@@ -1,42 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-        <meta charset="utf-8" />
-        <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-        <script type="text/javascript">
-            var accelerationX = 0;
-            var accelerationY = 0;
-            var accelerationZ = 0;
-                window.ondevicemotion = function(event) {  
-                    accelerationX = event.accelerationIncludingGravity.x;  
-                    accelerationY = event.accelerationIncludingGravity.y;  
-                    accelerationZ = event.accelerationIncludingGravity.z;
-                    $(".accel").html(accelerationX + " " + accelerationY + " " + accelerationZ);
-                    $.get("/set_speed/" + (accelerationY/10));
-                    $.get("/set/" + (accelerationX/20 + 0.5));
-                }                  
+	<meta charset="utf-8" />
+	<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+	<script type="text/javascript">
+		var speed = 0,
+			direction = 0.5;
 
-                $(function() {
-                        $("input").change(function() {
-                                var val = $(this).val()*0.01;
-                                if($(this).attr("name") == "steering") {
-                                    var url = "/set/";
-                                } else {
-                                    var url = "/set_speed/"; 
-                                }
-                                $.get(url+val);
-                        });
-                });
-        </script>
-        <style type="text/css">
-        input[type=range] {
-                width: 200px;
-        }
-        </style>
+		function sendEvent(url) {
+			$.get("/set_speed/" + speed);
+			$.get("/set/" + direction);
+		}
+
+		window.ondevicemotion = function(event) { 
+			if (!$("#use-accell").is(':checked')) {
+				return;
+			}
+
+			var x,y,z; 
+			x = event.accelerationIncludingGravity.x;  
+			y = event.accelerationIncludingGravity.y;  
+			z = event.accelerationIncludingGravity.z;
+			$(".accel").html(x + " " + y + " " + z);
+
+			speed = y/10;
+			direction = x/20 + 0.5;
+		}                  
+
+		$(function() {
+			$("input").change(function() {
+				var val = $(this).val()*0.01;
+				if($(this).attr("name") == "steering") {
+				    var url = "/set/";
+				} else {
+				    var url = "/set_speed/"; 
+				}
+				$.get(url+val);
+			});
+		});
+		setInterval(sendEvent, 50);
+	</script>
+
+	<style type="text/css">
+	input[type=range] {
+		width: 200px;
+		display: block;
+	}
+	</style>
 </head>
 <body>
 <input type="range" name="speed" min=0, max=100, step=1 />
 <input type="range" name="steering" min=0, max=100, step=1 />
+<input type="checkbox" id="use-accel"><label for="use-accel">Use acceleration</label>
 <div class="accel"></div>
 </body>
 </html>
