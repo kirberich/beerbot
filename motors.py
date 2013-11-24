@@ -4,14 +4,18 @@ import piface.pfio as pfio
 pfio.init()
 
 class Servo(object):
-    def __init__(self, port, min_pulse, max_pulse, pulse_multiplier=0.1):
+    def __init__(self, port, min_pulse, max_pulse, pulse_multiplier=0.1, min_position=0, max_position=1):
         self.port = port
         self.min_pulse = min_pulse
         self.max_pulse = max_pulse
         self.pulse_diff = max_pulse - min_pulse
         self.pulse_multiplier = pulse_multiplier
+        self.min_position = min_position
+        self.max_position = max_position
 
     def pulse_from_position(self, position):
+        position = max(position, self.min_position)
+        position = min(position, self.max_position)
         pulse = self.min_pulse + float(position)*self.pulse_diff
         return int(self.pulse_multiplier * pulse)
 

@@ -4,10 +4,27 @@
         <meta charset="utf-8" />
         <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
         <script type="text/javascript">
+            var accelerationX = 0;
+            var accelerationY = 0;
+            var accelerationZ = 0;
+                window.ondevicemotion = function(event) {  
+                    accelerationX = event.accelerationIncludingGravity.x;  
+                    accelerationY = event.accelerationIncludingGravity.y;  
+                    accelerationZ = event.accelerationIncludingGravity.z;
+                    $(".accel").html(accelerationX + " " + accelerationY + " " + accelerationZ);
+                    $.get("/set_speed/" + (accelerationY/10));
+                    $.get("/set/" + (accelerationX/20 + 0.5));
+                }                  
+
                 $(function() {
                         $("input").change(function() {
                                 var val = $(this).val()*0.01;
-                                $.get("/set/"+val);
+                                if($(this).attr("name") == "steering") {
+                                    var url = "/set/";
+                                } else {
+                                    var url = "/set_speed/"; 
+                                }
+                                $.get(url+val);
                         });
                 });
         </script>
@@ -18,6 +35,8 @@
         </style>
 </head>
 <body>
-<input type="range" min=0, max=100, step=1 />
+<input type="range" name="speed" min=0, max=100, step=1 />
+<input type="range" name="steering" min=0, max=100, step=1 />
+<div class="accel"></div>
 </body>
 </html>
