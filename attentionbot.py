@@ -36,14 +36,14 @@ while True:
     else:
         remote.rumble(False)
 
-    if button.pressed('left'):
+    if remote.pressed('left'):
         servo.set(0)
-    elif button.pressed('right'):
+    elif remote.pressed('right'):
         servo.set(1)
     else:
         servo.set(0.5)
 
-    if button.pressed('up'):
+    if remote.pressed('up'):
         motor.duty_cycle = 1
     else:
         motor.duty_cycle = 0
