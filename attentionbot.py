@@ -48,5 +48,15 @@ while True:
     else:
         motor.duty_cycle = 0
 
+    if remote.pressed('home'):
+        time.sleep(1)
+        remote.calibrate()
+        remote.rumble(True)
+        time.sleep(0.1)
+        remote.rumble(False)
+
+    if remote.pressed('b'):
+        print remote.accel()
+
     motor.tick()
     #time.sleep(0.01)
