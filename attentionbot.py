@@ -36,17 +36,28 @@ while True:
     else:
         remote.rumble(False)
 
-    if remote.pressed('left'):
-        servo.set(0)
-    elif remote.pressed('right'):
-        servo.set(1)
+    if remote.pressed('b'):
+        accel = remote.accel()
+        print accel
+        steer = accel[0]
+        steer = 0 if steer > -5 and steer < 5 else (steer + 25)/50.0
+        speed = accel[1]
+        speed = (speed + 15)/25.0
+        
+        servo.set(steer)
+        motor.duty_cycle = speed
     else:
-        servo.set(0.5)
+        if remote.pressed('left'):
+            servo.set(0)
+        elif remote.pressed('right'):
+            servo.set(1)
+        else:
+            servo.set(0.5)
 
-    if remote.pressed('up'):
-        motor.duty_cycle = 1
-    else:
-        motor.duty_cycle = 0
+        if remote.pressed('up'):
+            motor.duty_cycle = 1
+        else:
+            motor.duty_cycle = 0
 
     if remote.pressed('home'):
         time.sleep(1)
@@ -55,8 +66,6 @@ while True:
         time.sleep(0.1)
         remote.rumble(False)
 
-    if remote.pressed('b'):
-        print remote.accel()
 
     motor.tick()
     #time.sleep(0.01)
