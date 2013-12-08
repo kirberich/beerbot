@@ -42,15 +42,16 @@ class Remote(object):
         return self.wm.state['buttons'] & button_index
 
     def accel(self):
-        return self.wm.state['acc'] - self.accel_calibration
+        return [x-y for x,y in zip(self.wm.state['acc'], self.accel_calibration)]
 
     def calibrate(self):
         _avg = (0, 0, 0)
 
         for x in range(0, 20):
-            _avg += self.wm.state['acc']
+            _avg = [x+y for x,y in zip(_avg, self.wm.state['acc'])]
         self.accel_calibration = (_avg[0]/20.0, _avg[1]/20.0, _avg[2]/20.0)
         print "calibrated."
+        print self.accel_calibration
 
     def rumble(self, state):
         self.wm.rumble = state
