@@ -4,7 +4,7 @@ from api import Api
 from motors import Servo, Motor
 from remote import Remote
 
-servo = Servo(port=1, min_pulse=750, max_pulse=2250, min_position=0.37, max_position=0.63)
+servo = Servo(port=1, min_pulse=750, max_pulse=2250, min_position=0.30, max_position=0.7)
 motor = Motor(port=1, duty_cycle=0)
 
 def wave(min=0.0, max=1.0, n=1, pause=0.4):
@@ -30,6 +30,11 @@ while True:
             motor.duty_cycle = kwargs['position']
     api.events = []
 
+
+    if not remote.wm:
+       motor.tick()
+       continue
+
     # remote events
     if remote.pressed('a'):
         remote.rumble(True)
@@ -38,26 +43,23 @@ while True:
 
     if remote.pressed('b'):
         accel = remote.accel()
-        print accel
-        steer = accel[0]
-        steer = 0.5 if steer > -1 and steer < 1 else (steer + 25)/50.0 + 0.5
+        steer = accel[0] * -1
+        steer = 0.5 if steer > -1 and steer < 1 else (steer + 25)/50.0
         speed = accel[1]
         speed = (speed + 15)/25.0
 
-        print "steer %s" % steer
-        print "speed %s" % speed
         servo.set(steer)
         motor.duty_cycle = speed
     else:
         if remote.pressed('left'):
-            servo.set(0)
-        elif remote.pressed('right'):
             servo.set(1)
+        elif remote.pressed('right'):
+            servo.set(0)
         else:
             servo.set(0.5)
 
         if remote.pressed('up'):
-            motor.duty_cycle = 1
+            motor.duty_cycle = 0.1
         else:
             motor.duty_cycle = 0
 
@@ -67,7 +69,6 @@ while True:
         remote.rumble(True)
         time.sleep(0.1)
         remote.rumble(False)
-
 
     motor.tick()
     #time.sleep(0.01)
