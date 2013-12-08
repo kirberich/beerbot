@@ -40,10 +40,12 @@ while True:
         accel = remote.accel()
         print accel
         steer = accel[0]
-        steer = 0 if steer > -5 and steer < 5 else (steer + 25)/50.0
+        steer = 0.5 if steer > -1 and steer < 1 else (steer + 25)/50.0 + 0.5
         speed = accel[1]
         speed = (speed + 15)/25.0
-        
+
+        print "steer %s" % steer
+        print "speed %s" % speed
         servo.set(steer)
         motor.duty_cycle = speed
     else:
