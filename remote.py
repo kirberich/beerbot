@@ -18,6 +18,7 @@ class Remote(object):
     def __init__(self):
         self.wm = None
         self.accel_calibration = (0, 0, 0)
+        self.rumbling = False
 
         tries = 0
         while not self.wm:
@@ -54,7 +55,9 @@ class Remote(object):
         print self.accel_calibration
 
     def rumble(self, state):
-        self.wm.rumble = state
+        if state != self.rumbing:
+            self.wm.rumble = state
+        self.rumbling = state
 
     def toggle_rumble(self):
         self.wm.rumble = not self.wm.rumble
