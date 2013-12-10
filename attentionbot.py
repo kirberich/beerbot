@@ -35,7 +35,7 @@ while True:
         remote.rumble(True)
     else:
         remote.rumble(False)
-
+    print remote.angle()
     if remote.pressed('b'):
         accel = remote.accel()
         print accel

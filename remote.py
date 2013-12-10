@@ -24,7 +24,8 @@ class Remote(object):
         while not self.wm:
             try:
                 self.wm = cwiid.Wiimote()
-                self.wm.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC | cwiid.RPT_NUNCHUK
+                self.wm.enable(cwiid.FLAG_MOTIONPLUS)
+                self.wm.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC | cwiid.RPT_MOTIONPLUS
                 self.wm.led = 1
             except RuntimeError:
                 if tries > 10:
@@ -45,14 +46,22 @@ class Remote(object):
     def accel(self):
         return [x-y for x,y in zip(self.wm.state['acc'], self.accel_calibration)]
 
+    def angle(self):
+        return [x-y for x,y in zip(self.wm.state['motionplus']['angle_rate'], self.angle_calibration)]        
+
     def calibrate(self):
         _avg = (0, 0, 0)
-
         for x in range(0, 20):
             _avg = [x+y for x,y in zip(_avg, self.wm.state['acc'])]
         self.accel_calibration = (_avg[0]/20.0, _avg[1]/20.0, _avg[2]/20.0)
+
+        if 'motionplus' in self.wm.state:
+            _avg = (0, 0, 0)
+            for x in range(0, 20):
+                _avg = [x+y for x,y in zip(_avg, self.wm.state['motionplus']['angle_rate'])]
+            self.angle_calibration = (_avg[0]/20.0, _avg[1]/20.0, _avg[2]/20.0)
+
         print "calibrated."
-        print self.accel_calibration
 
     def rumble(self, state):
         if state != self.rumbing:
