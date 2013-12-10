@@ -28,7 +28,7 @@ class Remote(object):
                 self.wm.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC | cwiid.RPT_MOTIONPLUS
                 self.wm.led = 1
             except RuntimeError:
-                if tries > 10:
+                if tries > 5:
                     return
             finally:
                 tries += 1
@@ -64,7 +64,7 @@ class Remote(object):
         print "calibrated."
 
     def rumble(self, state):
-        if state != self.rumbing:
+        if state != self.rumbling:
             self.wm.rumble = state
         self.rumbling = state
 

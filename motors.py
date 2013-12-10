@@ -1,4 +1,7 @@
+import time
+import threading
 from subprocess import call
+
 import piface.pfio as pfio
 
 pfio.init()
@@ -12,6 +15,11 @@ class Servo(object):
         self.pulse_multiplier = pulse_multiplier
         self.min_position = min_position
         self.max_position = max_position
+        self.position = -1
+            
+        t = threading.Thread(target=self.write_position)
+        t.daemon = True
+        t.start()
 
     def pulse_from_position(self, position):
         position = max(position, self.min_position)
@@ -19,8 +27,13 @@ class Servo(object):
         pulse = self.min_pulse + float(position)*self.pulse_diff
         return int(self.pulse_multiplier * pulse)
 
+    def write_position(self):
+        while True:
+            call ("echo "+str(self.port)+"="+str(self.pulse_from_position(self.position))+" > /dev/servoblaster", shell=True)
+            time.sleep(0.1)
+
     def set(self, position):
-        call ("echo "+str(self.port)+"="+str(self.pulse_from_position(position))+" > /dev/servoblaster", shell=True)
+        self.position = position
 
 class Motor(object):
     def __init__(self, port, duty_cycle=1):
@@ -37,7 +50,7 @@ class Motor(object):
 
     def tick(self):
         """ Continue duty cycle, turn motor on or off accordingly """
-        self.duty_cycle_position += 0.01
+        self.duty_cycle_position += 0.1
         if self.duty_cycle_position >= 1:
             self.duty_cycle_position = 0
             
