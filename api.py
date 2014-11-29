@@ -1,9 +1,20 @@
 from twisted.web import http
 from twisted.web.http import HTTPChannel
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 import threading
 
 class BotHandler(http.Request, object):
+    BOUNDARY = "jpgboundary"
+
+    def get_frame(self):
+        return self.api.recorder.current_jpg_frame
+
+    def writeBoundary(self):
+        self.write("--%s\n" % (self.BOUNDARY))
+
+    def writeStop(self):
+        self.write("--%s--\n" % (self.BOUNDARY))
+
     def __init__(self, api, *args, **kwargs):
         self.api = api
         super(BotHandler, self).__init__(*args, **kwargs)
@@ -20,6 +31,36 @@ class BotHandler(http.Request, object):
     def not_found(self, message=None):
         self.setResponseCode(404, message)
         return self.simple_render("no no...")
+
+    def wait(self, seconds, result=None):
+        """Returns a deferred that will be fired later"""
+        d = defer.Deferred()
+        reactor.callLater(seconds, d.callback, result)
+        return d
+
+    @defer.inlineCallbacks
+    def serve_stream(self):
+        """ Serve video stream as multi-part jpg. Yes, this actually works. """
+        boundary = "jpgboundary"
+
+        self.setHeader('Connection', 'Keep-Alive')
+        self.setHeader('Content-Type', "multipart/x-mixed-replace;boundary=%s" % boundary)
+
+        while True:
+            content = self.get_frame()
+            self.write("Content-Type: image/jpg\n")
+            self.write("Content-Length: %s\n\n" % (len(content)))
+            self.write(content)
+            self.write("--%s\n" % (boundary))
+            yield self.wait(0.05)
+
+    def serve_stream_container(self):
+        headers = [("content-type", "text/html")]
+        content = "<html><head><title>Potato Pool Camera</title></head><body><img src='/stream.avi' alt='stream'/></body></html>"
+        self.render(content, headers)
+
+    def serve_frame(self):
+        return self.simple_render(self.get_frame(), "image/jpg")
 
     def process(self):
         command_args_list = [x for x in self.path.split("/") if x]
@@ -42,6 +83,10 @@ class BotHandler(http.Request, object):
                 print "speed"
                 self.api.trigger("set_speed", position=float(args[0]))
                 return self.simple_render("ok")
+            elif command.startswith("stream"):
+                return self.serve_stream()
+            elif command.startswith("show_stream"):
+                return self.serve_stream_container()
         except Exception, e:
             return self.simple_render(e.message)
 
@@ -63,11 +108,12 @@ class StreamFactory(http.HTTPFactory):
 class Api:
     """ An api for attentionbot, uses a twisted server inside a thread to keep track of webby things. """
 
-    def __init__(self):
+    def __init__(self, recorder):
         # This I believe is what you find when you look up "ugly" in the dictionary
         # But I really don't want to try and understand this FactoryFactoryFactory stuff properly
         HTTPChannel.requestFactory = BotHandlerFactory(api=self)
 
+        self.recorder = recorder
         self.events = []
         self.lock = threading.Lock()
 
