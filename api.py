@@ -34,19 +34,12 @@ class BotHandler(http.Request, object):
                 f = open("main.html")
                 content = f.read()
                 return self.simple_render(content, content_type="text/html")
-            if command.startswith("wave"):
-                n = int(args[0]) if len(args) > 0 else 1
-                if command == "wave_short":
-                    self.api.trigger("wave", min=0.3, max=0.7, n=n)
-                elif command == "wave_quick":
-                    self.api.trigger("wave", min=0.3, max=0.7, n=n, pause=0.2)
-                else:
-                    self.api.trigger("wave", n=n)
-                return self.simple_render(" ".join(["Wave and smile."]*n))
             elif command == "set":
+                print "direction"
                 self.api.trigger("set", position=float(args[0]))
                 return self.simple_render("ok")
             elif command == "set_speed":
+                print "speed"
                 self.api.trigger("set_speed", position=float(args[0]))
                 return self.simple_render("ok")
         except Exception, e:
@@ -76,6 +69,7 @@ class Api:
         HTTPChannel.requestFactory = BotHandlerFactory(api=self)
 
         self.events = []
+        self.lock = threading.Lock()
 
     def demonize(self, port=8080):
         reactor.listenTCP(port, StreamFactory())
@@ -88,9 +82,10 @@ class Api:
         reactor.run()
 
     def trigger(self, event, **kwargs):
-        for x in range(len(self.events)):
-            if self.events[x][0] == event:
-                self.events[x] = (event, kwargs)
-                return
-        self.events.append((event, kwargs))
-                                              
+        with self.lock:
+            for x in range(len(self.events)):
+                if self.events[x][0] == event:
+                    self.events[x] = (event, kwargs)
+                    return
+            self.events.append((event, kwargs))
+

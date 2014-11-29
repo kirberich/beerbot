@@ -7,35 +7,77 @@
 		var speed = 0,
 			direction = 0.5;
 
-		function sendEvent(url) {
+		function sendEvent() {
+			if (!$("#use-accel").is(':checked')) {
+				return;
+			}
+			console.log("test");
 			$.get("/set_speed/" + speed);
 			$.get("/set/" + direction);
 		}
 
-		window.ondevicemotion = function(event) { 
-			if (!$("#use-accell").is(':checked')) {
+		window.ondevicemotion = function(event) {
+			if (!$("#use-accel").is(':checked')) {
 				return;
 			}
 
-			var x,y,z; 
-			x = event.accelerationIncludingGravity.x;  
-			y = event.accelerationIncludingGravity.y;  
+			var x,y,z;
+			x = event.accelerationIncludingGravity.x;
+			y = event.accelerationIncludingGravity.y;
 			z = event.accelerationIncludingGravity.z;
 			$(".accel").html(x + " " + y + " " + z);
 
 			speed = y/10;
 			direction = x/20 + 0.5;
-		}                  
+		}
 
 		$(function() {
 			$("input").change(function() {
-				var val = $(this).val()*0.01;
+				var val = $(this).val();
 				if($(this).attr("name") == "steering") {
-				    var url = "/set/";
+					if (val == direction) {
+						return;
+					}
+					direction = val;
+					var url = "/set/";
+					val = val * -1;
+					$.get(url+(val));
 				} else {
-				    var url = "/set_speed/"; 
+					if (val == speed) {
+						return;
+					}
+					speed = val;
+					var url = "/set_speed/";
+					$.get(url+val);
 				}
-				$.get(url+val);
+			});
+
+			$("body").keydown(function(e) {
+				var keyCode = e.which;
+				switch(keyCode) {
+					case 38:
+						$("#speed").val(1).trigger("change");
+						break;
+					case 40:
+						$("#speed").val(-1).trigger("change");
+						break;
+					case 37:
+						$("#steering").val(-1).trigger("change");
+						break;
+					case 39:
+						$("#steering").val(1).trigger("change");
+						break;
+
+				}
+			});
+
+			$("body").keyup(function(e) {
+				var keyCode = e.which;
+				if (keyCode == 38 || keyCode == 40) {
+					$("#speed").val(0).trigger("change");
+				} else if (keyCode == 37 || keyCode == 39) {
+					$("#steering").val(0).trigger("change");
+				}
 			});
 		});
 		setInterval(sendEvent, 50);
@@ -49,8 +91,8 @@
 	</style>
 </head>
 <body>
-<input type="range" name="speed" min=0, max=100, step=1 />
-<input type="range" name="steering" min=0, max=100, step=1 />
+<input type="range" name="speed" id="speed" min="-1", max="1", step="0.05" />
+<input type="range" name="steering" id="steering" min="-1", max="1", step="0.05" />
 <input type="checkbox" id="use-accel"><label for="use-accel">Use acceleration</label>
 <div class="accel"></div>
 </body>
