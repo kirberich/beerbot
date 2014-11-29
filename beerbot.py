@@ -15,7 +15,7 @@ if __name__ == '__main__':
     speed_motor = Motor(serial, arduino_command="S")
     direction_motor = Motor(serial, arduino_command="D")
     api = Api()
-    api.demonize()
+    api.demonize(port=8000)
 
     while True:
         # api events
